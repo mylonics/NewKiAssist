@@ -1,0 +1,2 @@
+# NewKiAssist
+Kicad AI Assitance
