@@ -1,9 +1,13 @@
 <script setup lang="ts">
 import ChatBox from './components/ChatBox.vue';
+import KiCadInstanceSelector from './components/KiCadInstanceSelector.vue';
 </script>
 
 <template>
-  <ChatBox />
+  <div class="app-container">
+    <KiCadInstanceSelector />
+    <ChatBox />
+  </div>
 </template>
 
 <style>
@@ -24,5 +28,11 @@ body {
 #app {
   height: 100vh;
   overflow: hidden;
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
 }
 </style>

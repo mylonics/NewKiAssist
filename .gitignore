@@ -47,3 +47,6 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+
+# Research and temporary files
+research/
