@@ -36,10 +36,6 @@ async function detectInstances() {
   }
 }
 
-function selectInstance(instance: KiCadInstance) {
-  selectedInstance.value = instance;
-}
-
 // Auto-detect on component mount
 onMounted(() => {
   detectInstances();
@@ -86,7 +82,6 @@ onMounted(() => {
       <select 
         id="instance-select" 
         v-model="selectedInstance" 
-        @change="selectInstance(selectedInstance!)"
         class="instance-dropdown"
       >
         <option :value="null" disabled>-- Choose an instance --</option>

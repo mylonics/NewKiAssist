@@ -29,17 +29,9 @@ fn get_ipc_socket_dir() -> PathBuf {
 
 /// Convert a socket file path to the IPC URI format
 fn socket_path_to_uri(socket_file: &Path) -> String {
-    match env::consts::OS {
-        "windows" => {
-            // On Windows, prepend \\.\pipe\ to the socket path
-            let socket_str = socket_file.to_string_lossy();
-            format!("ipc://\\\\.\\pipe\\{}", socket_str)
-        }
-        _ => {
-            // On Unix-like systems, use the direct path
-            format!("ipc://{}", socket_file.display())
-        }
-    }
+    // NNG handles the platform-specific pipe conversion internally
+    // We just need to provide the path with the ipc:// scheme
+    format!("ipc://{}", socket_file.display())
 }
 
 /// Discover all KiCad IPC socket files
@@ -151,7 +143,8 @@ mod tests {
         {
             let path = PathBuf::from("C:\\Temp\\kicad\\api.sock");
             let uri = socket_path_to_uri(&path);
-            assert!(uri.starts_with("ipc://\\\\.\\pipe\\"));
+            assert!(uri.starts_with("ipc://"));
+            assert!(uri.contains("api.sock"));
         }
 
         #[cfg(not(windows))]
