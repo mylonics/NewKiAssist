@@ -6,7 +6,7 @@ KiCAD AI Assistance - A cross-platform desktop application for AI-powered KiCAD 
 
 - **Cross-Platform UI**: Built with Tauri + Vue for Windows, macOS, and Linux
 - **AI-Powered Chat**: Interactive chat interface powered by Google Gemini LLM
-  - Support for multiple Gemini models (1.5 Flash, 1.5 Pro, 1.5 Flash 8B)
+  - Support for multiple Gemini models (2.5 Flash, 2.5 Pro, 3 Flash, 3 Pro)
   - Automatic API key detection from environment variables
   - Secure API key storage for seamless experience
   - Real-time responses with loading indicators
@@ -98,9 +98,10 @@ KiAssist/
 1. **Start the Application**: Launch KiAssist with `npm run tauri dev` or run the built application
 2. **Configure API Key**: If not set via environment variable, enter your Gemini API key when prompted
 3. **Select Model**: Choose your preferred Gemini model from the dropdown in the chat header:
-   - **Gemini 1.5 Flash**: Fast and efficient for quick responses (1M token context)
-   - **Gemini 1.5 Pro**: Advanced capabilities for complex queries (2M token context)
-   - **Gemini 1.5 Flash 8B**: High volume, low latency model (1M token context)
+   - **Gemini 2.5 Flash**: Fast and efficient for quick responses
+   - **Gemini 2.5 Pro**: Advanced capabilities for complex queries
+   - **Gemini 3 Flash**: Future-ready fast model
+   - **Gemini 3 Pro**: Future-ready advanced model
 4. **Start Chatting**: Type your questions about KiCAD or PCB design and get AI-powered responses
 5. **Manage Settings**: Click the settings button (⚙️) to update your API key at any time
 
