@@ -11,17 +11,16 @@ interface Message {
 
 const messages = ref<Message[]>([]);
 const inputMessage = ref('');
-const selectedModel = ref('2.5-flash');
+const selectedModel = ref('1.5-flash');
 const hasApiKey = ref(false);
 const showApiKeyPrompt = ref(false);
 const apiKeyInput = ref('');
 const isLoading = ref(false);
 
 const availableModels = [
-  { value: '2.5-flash', label: 'Gemini 2.5 Flash' },
-  { value: '2.5-pro', label: 'Gemini 2.5 Pro' },
-  { value: '3-flash', label: 'Gemini 3 Flash' },
-  { value: '3-pro', label: 'Gemini 3 Pro' },
+  { value: '1.5-flash', label: 'Gemini 1.5 Flash' },
+  { value: '1.5-pro', label: 'Gemini 1.5 Pro' },
+  { value: '1.5-flash-8b', label: 'Gemini 1.5 Flash 8B' },
 ];
 
 function generateMessageId(): string {

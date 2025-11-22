@@ -37,15 +37,14 @@ pub async fn send_message_to_gemini(
     // Map model name to full Gemini model ID
     // Using the stable Gemini models that are available
     let model_id = match model {
-        "2.5-flash" => "gemini-1.5-flash",  // Flash variant
-        "2.5-pro" => "gemini-1.5-pro",      // Pro variant
-        "3-flash" => "gemini-1.5-flash",    // Using 1.5-flash for now
-        "3-pro" => "gemini-1.5-pro",        // Using 1.5-pro for now
-        _ => "gemini-1.5-flash",            // Default to flash
+        "1.5-flash" => "gemini-1.5-flash",      // Fast, cost-effective (1M token context)
+        "1.5-pro" => "gemini-1.5-pro",          // Complex reasoning (2M token context)
+        "1.5-flash-8b" => "gemini-1.5-flash-8b", // High volume, low latency (1M token context)
+        _ => "gemini-1.5-flash",                 // Default to flash
     };
     
     let url = format!(
-        "https://generativelanguage.googleapis.com/v1beta/models/{}:generateContent?key={}",
+        "https://generativelanguage.googleapis.com/v1/models/{}:generateContent?key={}",
         model_id, api_key
     );
     
