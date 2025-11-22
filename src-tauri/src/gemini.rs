@@ -45,7 +45,7 @@ pub async fn send_message_to_gemini(
     };
     
     let url = format!(
-        "https://generativelanguage.googleapis.com/v1beta/models/{}:generateContent?key={}",
+        "https://generativelanguage.googleapis.com/v1/models/{}:generateContent?key={}",
         model_id, api_key
     );
     
