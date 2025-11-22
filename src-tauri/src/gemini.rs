@@ -35,12 +35,13 @@ pub async fn send_message_to_gemini(
     let client = Client::new();
     
     // Map model name to full Gemini model ID
+    // Using the stable Gemini models that are available
     let model_id = match model {
-        "2.5-flash" => "gemini-2.0-flash-exp",
-        "2.5-pro" => "gemini-exp-1206",
-        "3-flash" => "gemini-2.0-flash-exp",
-        "3-pro" => "gemini-exp-1206",
-        _ => "gemini-2.0-flash-exp", // Default to flash
+        "2.5-flash" => "gemini-1.5-flash",  // Flash variant
+        "2.5-pro" => "gemini-1.5-pro",      // Pro variant
+        "3-flash" => "gemini-1.5-flash",    // Using 1.5-flash for now
+        "3-pro" => "gemini-1.5-pro",        // Using 1.5-pro for now
+        _ => "gemini-1.5-flash",            // Default to flash
     };
     
     let url = format!(
