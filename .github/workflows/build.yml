@@ -60,7 +60,16 @@ jobs:
           libxdo-dev \
           libssl-dev \
           libayatana-appindicator3-dev \
-          librsvg2-dev
+          librsvg2-dev \
+          protobuf-compiler
+
+    - name: Install Protocol Buffers compiler (macOS)
+      if: matrix.platform == 'macos-latest'
+      run: brew install protobuf
+
+    - name: Install Protocol Buffers compiler (Windows)
+      if: matrix.platform == 'windows-latest'
+      run: choco install protoc
 
     - name: Install Python package
       run: |
