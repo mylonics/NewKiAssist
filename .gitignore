@@ -54,3 +54,4 @@ build/KiAssist/
 
 # Research and temporary files
 # research/ - Removed to allow structured research documentation
+test_backend.py
