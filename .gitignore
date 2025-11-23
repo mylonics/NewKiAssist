@@ -49,4 +49,4 @@ wheels/
 *.egg
 
 # Research and temporary files
-research/
+# research/ - Removed to allow structured research documentation
