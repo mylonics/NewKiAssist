@@ -146,38 +146,41 @@ onMounted(() => {
 
 <style scoped>
 .kicad-selector {
-  padding: 1rem;
-  background-color: var(--bg-tertiary);
-  border-radius: 8px;
-  margin-bottom: 1rem;
+  padding: 0.75rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .selector-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .selector-header h3 {
   margin: 0;
-  font-size: 1.1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
   color: var(--text-primary);
 }
 
 .refresh-btn {
-  padding: 0.5rem 1rem;
+  padding: 0.3rem 0.6rem;
   background-color: var(--bg-input);
   border: 1px solid var(--border-color);
-  border-radius: 6px;
+  border-radius: 3px;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 0.75rem;
   color: var(--text-primary);
-  transition: background-color 0.2s;
 }
 
 .refresh-btn:hover:not(:disabled) {
   background-color: var(--bg-secondary);
+  border-color: var(--text-secondary);
 }
 
 .refresh-btn:disabled {
@@ -187,32 +190,33 @@ onMounted(() => {
 
 .error-message {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem;
+  align-items: flex-start;
+  gap: 0.4rem;
+  padding: 0.5rem;
   background-color: #fee;
   border: 1px solid #fcc;
-  border-radius: 6px;
+  border-radius: 3px;
   color: #c33;
+  font-size: 0.75rem;
 }
 
 .error-icon {
-  font-size: 1.2rem;
+  font-size: 0.9rem;
   flex-shrink: 0;
 }
 
 .error-text {
   flex: 1;
+  line-height: 1.3;
 }
 
 .copy-btn {
-  padding: 0.25rem 0.5rem;
+  padding: 0.15rem 0.35rem;
   background-color: rgba(0, 0, 0, 0.05);
   border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 4px;
+  border-radius: 2px;
   cursor: pointer;
-  font-size: 0.75rem;
-  transition: background-color 0.2s;
+  font-size: 0.65rem;
   flex-shrink: 0;
 }
 
@@ -220,23 +224,20 @@ onMounted(() => {
   background-color: rgba(0, 0, 0, 0.1);
 }
 
-.copy-btn:active {
-  background-color: rgba(0, 0, 0, 0.15);
-}
-
 .loading-message {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 1rem;
+  gap: 0.5rem;
+  padding: 0.75rem;
   justify-content: center;
   color: var(--text-secondary);
+  font-size: 0.8rem;
 }
 
 .spinner {
-  width: 20px;
-  height: 20px;
-  border: 3px solid var(--border-color);
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--border-color);
   border-top-color: #667eea;
   border-radius: 50%;
   animation: spin 1s linear infinite;
@@ -248,92 +249,103 @@ onMounted(() => {
 
 .no-instances {
   text-align: center;
-  padding: 2rem 1rem;
+  padding: 1rem 0.5rem;
   color: var(--text-secondary);
 }
 
 .no-instances p:first-child {
   font-weight: 500;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.3rem;
+  font-size: 0.85rem;
 }
 
 .hint {
-  font-size: 0.9rem;
+  font-size: 0.75rem;
   opacity: 0.8;
 }
 
 .single-instance {
-  text-align: center;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .instance-card {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 1rem;
-  background-color: var(--bg-primary);
-  border: 2px solid var(--border-color);
-  border-radius: 8px;
+  gap: 0.6rem;
+  padding: 0.6rem;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 3px;
   margin-bottom: 0.5rem;
 }
 
 .instance-card.selected {
   border-color: #667eea;
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+  background-color: rgba(102, 126, 234, 0.08);
 }
 
 .instance-icon {
-  width: 40px;
-  height: 40px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  width: 28px;
+  height: 28px;
+  background-color: #667eea;
   color: white;
-  border-radius: 50%;
+  border-radius: 3px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
+  font-size: 1rem;
   flex-shrink: 0;
 }
 
 .instance-info {
   flex: 1;
-  text-align: left;
+  min-width: 0;
 }
 
 .instance-name {
-  font-weight: 600;
+  font-weight: 500;
   color: var(--text-primary);
-  margin-bottom: 0.25rem;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .instance-project {
-  font-size: 0.85rem;
+  font-size: 0.7rem;
   color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .connection-status {
   color: #5a5;
   font-weight: 500;
-  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  margin-top: 0.3rem;
+  text-align: center;
 }
 
 .multiple-instances label {
   display: block;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
   font-weight: 500;
   color: var(--text-primary);
+  font-size: 0.8rem;
 }
 
 .instance-dropdown {
   width: 100%;
-  padding: 0.75rem;
+  padding: 0.4rem;
   border: 1px solid var(--border-color);
-  border-radius: 6px;
+  border-radius: 3px;
   background-color: var(--bg-input);
   color: var(--text-primary);
-  font-size: 1rem;
+  font-size: 0.8rem;
   cursor: pointer;
-  transition: border-color 0.2s;
 }
 
 .instance-dropdown:focus {
@@ -342,17 +354,19 @@ onMounted(() => {
 }
 
 .selected-info {
-  margin-top: 1rem;
-  padding: 0.75rem;
-  background-color: var(--bg-primary);
-  border-radius: 6px;
+  margin-top: 0.6rem;
+  padding: 0.5rem;
+  background-color: var(--bg-secondary);
+  border-radius: 3px;
   border: 1px solid var(--border-color);
+  flex: 1;
+  overflow-y: auto;
 }
 
 .info-row {
   display: flex;
-  justify-content: space-between;
-  padding: 0.5rem 0;
+  flex-direction: column;
+  padding: 0.4rem 0;
 }
 
 .info-row:not(:last-child) {
@@ -362,16 +376,16 @@ onMounted(() => {
 .info-row .label {
   font-weight: 500;
   color: var(--text-secondary);
-  min-width: 80px;
-  flex-shrink: 0;
+  font-size: 0.7rem;
+  margin-bottom: 0.15rem;
 }
 
 .info-row .value {
   color: var(--text-primary);
   font-weight: 400;
   word-break: break-all;
-  text-align: right;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  line-height: 1.3;
 }
 </style>
