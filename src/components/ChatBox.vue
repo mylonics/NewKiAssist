@@ -19,10 +19,10 @@ const isLoading = ref(false);
 const apiKeyWarning = ref<string>('');
 
 const availableModels = [
-  { value: '2.5-flash', label: 'Gemini 2.0 Flash' },
-  { value: '2.5-pro', label: 'Gemini 1.5 Pro' },
-  { value: '3-flash', label: 'Gemini 2.0 Flash (Alt)' },
-  { value: '3-pro', label: 'Gemini 1.5 Pro (Alt)' },
+  { value: '2.5-flash', label: 'Gemini 2.5 Flash' },
+  { value: '2.5-pro', label: 'Gemini 2.5 Pro' },
+  { value: '3-flash', label: 'Gemini 3.0 Flash' },
+  { value: '3-pro', label: 'Gemini 3.0 Pro' },
 ];
 
 function generateMessageId(): string {

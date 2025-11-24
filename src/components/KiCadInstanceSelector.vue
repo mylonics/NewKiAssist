@@ -7,29 +7,49 @@ const selectedInstance = ref<KiCadInstance | null>(null);
 const loading = ref(false);
 const error = ref<string>('');
 
+async function waitForAPI(maxAttempts = 20, delayMs = 100): Promise<boolean> {
+  for (let i = 0; i < maxAttempts; i++) {
+    if (window.pywebview?.api) {
+      return true;
+    }
+    await new Promise(resolve => setTimeout(resolve, delayMs));
+  }
+  return false;
+}
+
 async function detectInstances() {
   loading.value = true;
   error.value = '';
   
   try {
-    if (window.pywebview?.api) {
-      const detected = await window.pywebview.api.detect_kicad_instances();
-      instances.value = detected;
-      
-      // Auto-select if only one instance is found
-      if (detected.length === 1) {
-        selectedInstance.value = detected[0];
-      } else if (detected.length === 0) {
-        error.value = 'No KiCAD instances detected. Please make sure KiCAD is running.';
-      }
-    } else {
+    // Wait for API to be available (up to 2 seconds)
+    const apiAvailable = await waitForAPI();
+    
+    if (!apiAvailable) {
       error.value = 'pywebview API not available';
+      return;
+    }
+    
+    const detected = await window.pywebview!.api.detect_kicad_instances();
+    instances.value = detected;
+    
+    // Auto-select if only one instance is found
+    if (detected.length === 1) {
+      selectedInstance.value = detected[0];
+    } else if (detected.length === 0) {
+      error.value = 'No KiCAD instances detected. Please make sure KiCAD is running.';
     }
   } catch (err) {
     error.value = `Error detecting KiCAD instances: ${err}`;
     console.error('Error detecting KiCAD instances:', err);
   } finally {
     loading.value = false;
+  }
+}
+
+function copyError() {
+  if (error.value) {
+    navigator.clipboard.writeText(error.value);
   }
 }
 
@@ -50,7 +70,8 @@ onMounted(() => {
 
     <div v-if="error" class="error-message">
       <span class="error-icon">⚠️</span>
-      <span>{{ error }}</span>
+      <span class="error-text">{{ error }}</span>
+      <button @click="copyError" class="copy-btn" title="Copy error message">Copy</button>
     </div>
 
     <div v-else-if="loading" class="loading-message">
@@ -159,6 +180,30 @@ onMounted(() => {
 
 .error-icon {
   font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.error-text {
+  flex: 1;
+}
+
+.copy-btn {
+  padding: 0.25rem 0.5rem;
+  background-color: rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: background-color 0.2s;
+  flex-shrink: 0;
+}
+
+.copy-btn:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.copy-btn:active {
+  background-color: rgba(0, 0, 0, 0.15);
 }
 
 .loading-message {
