@@ -61,13 +61,16 @@ class KiAssistAPI:
             api_key: The API key to store
             
         Returns:
-            Result dictionary with success status
+            Result dictionary with success status and optional warning
         """
         try:
-            self.api_key_store.set_api_key(api_key)
+            success, warning = self.api_key_store.set_api_key(api_key)
             # Update the Gemini API instance
             self.gemini_api = GeminiAPI(api_key)
-            return {"success": True}
+            result = {"success": success}
+            if warning:
+                result["warning"] = warning
+            return result
         except Exception as e:
             return {"success": False, "error": str(e)}
     
