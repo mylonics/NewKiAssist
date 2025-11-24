@@ -69,6 +69,41 @@ Researched installer solutions for PyInstaller-based cross-platform distribution
 
 ---
 
+## 3. Circuit Generation Libraries Research
+
+**Date**: 2025-11-24  
+**Status**: Complete  
+**Recommendation**: circuit-synth
+
+### Quick Summary
+
+Compared 3 circuit generation libraries for KiAssist's circuit database and AI-assisted design features:
+
+| Library | Score | Recommendation |
+|---------|-------|----------------|
+| **circuit-synth** ✅ | 4.5/5 | **PRIMARY** - Native AI integration, Python-based, full KiCAD support |
+| **atopile** | 4.0/5 | Secondary - Hardware-as-code, good for modular designs |
+| **pcb (diodeinc)** | 3.0/5 | Not Recommended - Custom DSL, experimental Windows support |
+
+### Key Findings
+
+1. **AI Integration**: circuit-synth has native Claude Code agents and llm.txt documentation
+2. **KiCAD Support**: circuit-synth generates all KiCAD file types (.kicad_sch, .kicad_pcb, .kicad_pro)
+3. **Database Compatibility**: Python-based circuits serialize easily to JSON/YAML
+4. **Learning Curve**: Python syntax is familiar to LLMs and developers
+
+### Read More
+
+- **[REPORT.md](circuit-generation-libraries/REPORT.md)**: Complete findings and recommendations
+- **[ANALYSIS.md](circuit-generation-libraries/ANALYSIS.md)**: Detailed comparison of all three libraries
+- **[PROPOSAL.md](circuit-generation-libraries/PROPOSAL.md)**: Implementation roadmap for KiAssist integration
+- **[GAPS.md](circuit-generation-libraries/GAPS.md)**: Knowledge gaps and validation strategies
+- **[SCOPE.md](circuit-generation-libraries/SCOPE.md)**: Research objectives and constraints
+- **[REFERENCES.md](circuit-generation-libraries/REFERENCES.md)**: 33 technical references
+- **[CHANGELOG.md](circuit-generation-libraries/CHANGELOG.md)**: Research activity log
+
+---
+
 ## Research Template
 
 Each research topic follows the same structure:
