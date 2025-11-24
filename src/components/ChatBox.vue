@@ -16,12 +16,13 @@ const hasApiKey = ref(false);
 const showApiKeyPrompt = ref(false);
 const apiKeyInput = ref('');
 const isLoading = ref(false);
+const apiKeyWarning = ref<string>('');
 
 const availableModels = [
-  { value: '2.5-flash', label: 'Gemini 2.5 Flash' },
-  { value: '2.5-pro', label: 'Gemini 2.5 Pro' },
-  { value: '3-flash', label: 'Gemini 3 Flash' },
-  { value: '3-pro', label: 'Gemini 3 Pro' },
+  { value: '2.5-flash', label: 'Gemini 2.0 Flash' },
+  { value: '2.5-pro', label: 'Gemini 1.5 Pro' },
+  { value: '3-flash', label: 'Gemini 2.0 Flash (Alt)' },
+  { value: '3-pro', label: 'Gemini 1.5 Pro (Alt)' },
 ];
 
 function generateMessageId(): string {
@@ -49,6 +50,7 @@ async function saveApiKey() {
   if (!apiKeyInput.value.trim()) return;
   
   apiKeyError.value = ''; // Clear previous errors
+  apiKeyWarning.value = ''; // Clear previous warnings
   
   try {
     if (window.pywebview?.api) {
@@ -57,6 +59,18 @@ async function saveApiKey() {
         hasApiKey.value = true;
         showApiKeyPrompt.value = false;
         apiKeyInput.value = '';
+        // Show warning as a message if there was one
+        if (result.warning) {
+          apiKeyWarning.value = result.warning;
+          // Also add a message to inform the user
+          const warningMessage: Message = {
+            id: generateMessageId(),
+            text: `Note: ${result.warning}`,
+            sender: 'assistant',
+            timestamp: new Date(),
+          };
+          messages.value.push(warningMessage);
+        }
       } else {
         apiKeyError.value = result.error || 'Unknown error occurred';
       }
@@ -117,7 +131,7 @@ async function sendMessage() {
     } else {
       const errorMessage: Message = {
         id: generateMessageId(),
-        text: 'pywebview API not available',
+        text: 'Application backend not available. Please restart the application.',
         sender: 'assistant',
         timestamp: new Date(),
       };
@@ -392,6 +406,11 @@ onMounted(() => {
 .message-text {
   word-wrap: break-word;
   line-height: 1.5;
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  cursor: text;
 }
 
 .message-time {

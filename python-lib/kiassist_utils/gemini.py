@@ -8,12 +8,13 @@ from typing import Optional
 class GeminiAPI:
     """Handle interactions with Google Gemini API."""
     
-    # Model mapping
+    # Model mapping from UI selection to actual Gemini model IDs
+    # These are the model IDs used by the google-genai library
     MODEL_MAP = {
-        "2.5-flash": "gemini-1.5-flash",
-        "2.5-pro": "gemini-1.5-pro",
-        "3-flash": "gemini-1.5-flash",  # Using 1.5-flash for now
-        "3-pro": "gemini-1.5-pro",      # Using 1.5-pro for now
+        "2.5-flash": "gemini-2.0-flash",      # Use Gemini 2.0 Flash (latest stable)
+        "2.5-pro": "gemini-1.5-pro",          # Gemini 1.5 Pro
+        "3-flash": "gemini-2.0-flash",        # Use Gemini 2.0 Flash
+        "3-pro": "gemini-1.5-pro",            # Gemini 1.5 Pro
     }
     
     def __init__(self, api_key: str):
@@ -38,7 +39,7 @@ class GeminiAPI:
             Exception: If the API call fails
         """
         # Map model name to full Gemini model ID
-        model_id = self.MODEL_MAP.get(model, "gemini-1.5-flash")
+        model_id = self.MODEL_MAP.get(model, "gemini-2.0-flash")
         
         try:
             response = self.client.models.generate_content(

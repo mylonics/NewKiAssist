@@ -10,6 +10,7 @@ export interface KiCadInstance {
 export interface ApiResult {
   success: boolean;
   error?: string;
+  warning?: string;
 }
 
 export interface SendMessageResult extends ApiResult {
