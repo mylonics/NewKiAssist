@@ -11,6 +11,9 @@ from typing import List, Dict, Any, Optional
 # (since we can't enumerate named pipes easily)
 MAX_WINDOWS_INSTANCES = 10
 
+# Cache the current OS platform
+_CURRENT_PLATFORM = platform.system()
+
 
 class KiCadInstance:
     """Represents a detected KiCad instance."""
@@ -50,9 +53,7 @@ def get_ipc_socket_dir() -> Path:
     Returns:
         Path to the socket directory
     """
-    system = platform.system()
-    
-    if system == "Windows":
+    if _CURRENT_PLATFORM == "Windows":
         temp = gettempdir()
         return Path(temp) / "kicad"
     else:
@@ -78,9 +79,7 @@ def discover_socket_files() -> List[Path]:
     socket_dir = get_ipc_socket_dir()
     sockets = []
     
-    system = platform.system()
-    
-    if system == "Windows":
+    if _CURRENT_PLATFORM == "Windows":
         # On Windows, named pipes are not visible as files.
         # Generate potential socket paths for KiCad instances.
         # KiCad creates: api.sock, api-1.sock, api-2.sock, etc.

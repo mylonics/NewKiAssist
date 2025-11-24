@@ -21,7 +21,7 @@ class TestGetIpcSocketDir:
 
     def test_linux_socket_dir(self):
         """Test socket directory on Linux."""
-        with mock.patch('kiassist_utils.kicad_ipc.platform.system', return_value='Linux'):
+        with mock.patch('kiassist_utils.kicad_ipc._CURRENT_PLATFORM', 'Linux'):
             with mock.patch.dict(os.environ, {'HOME': '/home/testuser'}, clear=False):
                 # When flatpak path doesn't exist, return default
                 result = get_ipc_socket_dir()
@@ -29,8 +29,8 @@ class TestGetIpcSocketDir:
 
     def test_windows_socket_dir(self):
         """Test socket directory on Windows."""
-        with mock.patch('kiassist_utils.kicad_ipc.platform.system', return_value='Windows'):
-            with mock.patch('kiassist_utils.kicad_ipc.gettempdir', return_value='C:\\Users\\test\\AppData\\Local\\Temp'):
+        with mock.patch('kiassist_utils.kicad_ipc._CURRENT_PLATFORM', 'Windows'):
+            with mock.patch('kiassist_utils.kicad_ipc.gettempdir', return_value=r'C:\Users\test\AppData\Local\Temp'):
                 result = get_ipc_socket_dir()
                 # Check the path parts are correct (platform-independent)
                 assert str(result).replace('/', '\\').endswith('kicad')
@@ -38,7 +38,7 @@ class TestGetIpcSocketDir:
 
     def test_macos_socket_dir(self):
         """Test socket directory on macOS."""
-        with mock.patch('kiassist_utils.kicad_ipc.platform.system', return_value='Darwin'):
+        with mock.patch('kiassist_utils.kicad_ipc._CURRENT_PLATFORM', 'Darwin'):
             with mock.patch.dict(os.environ, {'HOME': '/Users/testuser'}, clear=False):
                 # When flatpak path doesn't exist, return default
                 result = get_ipc_socket_dir()
@@ -50,8 +50,8 @@ class TestDiscoverSocketFiles:
 
     def test_windows_generates_potential_paths(self):
         """Test that Windows returns generated potential socket paths."""
-        with mock.patch('kiassist_utils.kicad_ipc.platform.system', return_value='Windows'):
-            with mock.patch('kiassist_utils.kicad_ipc.gettempdir', return_value='C:\\Temp'):
+        with mock.patch('kiassist_utils.kicad_ipc._CURRENT_PLATFORM', 'Windows'):
+            with mock.patch('kiassist_utils.kicad_ipc.gettempdir', return_value=r'C:\Temp'):
                 result = discover_socket_files()
                 
                 # Should have MAX_WINDOWS_INSTANCES paths
@@ -69,7 +69,7 @@ class TestDiscoverSocketFiles:
 
     def test_linux_returns_empty_when_dir_not_exists(self):
         """Test that Linux returns empty list when socket dir doesn't exist."""
-        with mock.patch('kiassist_utils.kicad_ipc.platform.system', return_value='Linux'):
+        with mock.patch('kiassist_utils.kicad_ipc._CURRENT_PLATFORM', 'Linux'):
             with mock.patch.dict(os.environ, {'HOME': '/nonexistent'}, clear=False):
                 result = discover_socket_files()
                 assert result == []
@@ -85,7 +85,7 @@ class TestDiscoverSocketFiles:
             (socket_dir / "api-1.sock").touch()
             (socket_dir / "other.txt").touch()  # Should be ignored
             
-            with mock.patch('kiassist_utils.kicad_ipc.platform.system', return_value='Linux'):
+            with mock.patch('kiassist_utils.kicad_ipc._CURRENT_PLATFORM', 'Linux'):
                 with mock.patch('kiassist_utils.kicad_ipc.get_ipc_socket_dir', return_value=socket_dir):
                     result = discover_socket_files()
                     
