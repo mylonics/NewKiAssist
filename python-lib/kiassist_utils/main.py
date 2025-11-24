@@ -105,10 +105,20 @@ def get_frontend_path() -> Path:
     Returns:
         Path to the dist directory
     """
-    # Try to find the dist directory
-    # When running from source, it's in the repository root
-    # When packaged, it might be in different locations
+    # If running as a PyInstaller frozen executable
+    if getattr(sys, 'frozen', False):
+        # PyInstaller extracts files to sys._MEIPASS
+        base_path = Path(sys._MEIPASS)
+        dist_path = base_path / "dist"
+        print(f"[DEBUG] Running as frozen executable")
+        print(f"[DEBUG] Base path (sys._MEIPASS): {base_path}")
+        print(f"[DEBUG] Looking for dist at: {dist_path}")
+        print(f"[DEBUG] Dist exists: {dist_path.exists()}")
+        if dist_path.exists():
+            print(f"[DEBUG] Contents: {list(dist_path.iterdir())}")
+            return dist_path
     
+    # When running from source, try to find the dist directory
     # Get the directory of this file
     current_file = Path(__file__)
     python_lib = current_file.parent.parent  # Up to python-lib
@@ -116,18 +126,14 @@ def get_frontend_path() -> Path:
     
     # Check for dist in repository root
     dist_path = repo_root / "dist"
+    print(f"[DEBUG] Running from source")
+    print(f"[DEBUG] Looking for dist at: {dist_path}")
+    print(f"[DEBUG] Dist exists: {dist_path.exists()}")
     if dist_path.exists():
         return dist_path
     
-    # If running from installed package, check relative to executable
-    if getattr(sys, 'frozen', False):
-        # Running as compiled executable
-        exe_path = Path(sys.executable).parent
-        dist_path = exe_path / "dist"
-        if dist_path.exists():
-            return dist_path
-    
     # Fallback: create a minimal index.html if dist not found
+    print(f"[DEBUG] No dist directory found!")
     return None
 
 
