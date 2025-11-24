@@ -1,5 +1,6 @@
 name: Build and Test
-# NOTE: Version numbers in installer filenames (lines 77, 88, 119) should be kept in sync with python-lib/pyproject.toml
+# NOTE: Version numbers in artifact names should be kept in sync with python-lib/pyproject.toml
+# Search for "0.1.0" in this file to find all version references that need updating
 
 on:
   push:
@@ -88,7 +89,7 @@ jobs:
           --icon "KiAssist.app" 175 190 \
           --hide-extension "KiAssist.app" \
           --app-drop-link 425 190 \
-          "KiAssist-0.1.0.dmg" \
+          "KiAssist-0.1.0-macos.dmg" \
           "dist/KiAssist.app" || echo "Warning: DMG creation failed, app bundle will still be available"
 
     - name: Install AppImage dependencies (Ubuntu)
@@ -121,44 +122,75 @@ jobs:
         # Build AppImage
         ARCH=x86_64 ./appimagetool-x86_64.AppImage KiAssist.AppDir KiAssist-0.1.0-x86_64.AppImage
 
-    - name: Upload build artifacts (Ubuntu)
+    - name: Prepare Linux portable archive
+      if: matrix.platform == 'ubuntu-latest'
+      run: |
+        cd dist
+        mv KiAssist KiAssist_Portable
+        tar -czvf KiAssist_Portable-0.1.0-linux-x86_64.tar.gz KiAssist_Portable
+
+    - name: Upload Linux Portable
       if: matrix.platform == 'ubuntu-latest'
       uses: actions/upload-artifact@v4
       with:
-        name: linux-build
-        path: dist/KiAssist
+        name: KiAssist_Portable-0.1.0-linux-x86_64.tar.gz
+        path: dist/KiAssist_Portable-0.1.0-linux-x86_64.tar.gz
+        compression-level: 0
 
     - name: Upload Linux AppImage
       if: matrix.platform == 'ubuntu-latest'
       uses: actions/upload-artifact@v4
       with:
-        name: linux-appimage
+        name: KiAssist-0.1.0-x86_64.AppImage
         path: KiAssist-*-x86_64.AppImage
-
-    - name: Upload build artifacts (macOS)
-      if: matrix.platform == 'macos-latest'
-      uses: actions/upload-artifact@v4
-      with:
-        name: macos-build
-        path: dist/KiAssist.app
+        compression-level: 0
 
     - name: Upload macOS DMG
       if: matrix.platform == 'macos-latest'
       uses: actions/upload-artifact@v4
       with:
-        name: macos-installer
-        path: KiAssist-*.dmg
+        name: KiAssist-0.1.0-macos.dmg
+        path: KiAssist-0.1.0-macos.dmg
+        compression-level: 0
+        if-no-files-found: ignore
 
-    - name: Upload build artifacts (Windows)
+    - name: Prepare macOS portable archive (fallback)
+      if: matrix.platform == 'macos-latest'
+      run: |
+        # Only create portable if DMG was not created
+        if [ ! -f "KiAssist-0.1.0-macos.dmg" ]; then
+          cd dist
+          zip -r KiAssist_Portable-0.1.0-macos.zip KiAssist.app
+        fi
+
+    - name: Upload macOS Portable (fallback)
+      if: matrix.platform == 'macos-latest'
+      uses: actions/upload-artifact@v4
+      with:
+        name: KiAssist_Portable-0.1.0-macos.zip
+        path: dist/KiAssist_Portable-0.1.0-macos.zip
+        compression-level: 0
+        if-no-files-found: ignore
+
+    - name: Prepare Windows portable archive
+      if: matrix.platform == 'windows-latest'
+      run: |
+        cd dist
+        Rename-Item -Path "KiAssist" -NewName "KiAssist_Portable"
+        Compress-Archive -Path "KiAssist_Portable" -DestinationPath "KiAssist_Portable-0.1.0-windows-x86_64.zip"
+
+    - name: Upload Windows Portable
       if: matrix.platform == 'windows-latest'
       uses: actions/upload-artifact@v4
       with:
-        name: windows-build
-        path: dist/KiAssist
+        name: KiAssist_Portable-0.1.0-windows-x86_64.zip
+        path: dist/KiAssist_Portable-0.1.0-windows-x86_64.zip
+        compression-level: 0
 
     - name: Upload Windows Installer
       if: matrix.platform == 'windows-latest'
       uses: actions/upload-artifact@v4
       with:
-        name: windows-installer
+        name: KiAssist-Setup-0.1.0-windows.exe
         path: installer-output/KiAssist-Setup-*.exe
+        compression-level: 0
