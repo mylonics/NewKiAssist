@@ -1,4 +1,5 @@
 name: Build and Test
+# NOTE: Version numbers in installer filenames (lines 77, 88, 119) should be kept in sync with python-lib/pyproject.toml
 
 on:
   push:
@@ -77,6 +78,8 @@ jobs:
     - name: Create macOS DMG
       if: matrix.platform == 'macos-latest'
       run: |
+        # create-dmg may fail if KiAssist.app is already signed or in certain edge cases
+        # Using || true allows the workflow to continue and upload the app bundle as a fallback
         create-dmg \
           --volname "KiAssist" \
           --window-pos 200 120 \
@@ -86,7 +89,7 @@ jobs:
           --hide-extension "KiAssist.app" \
           --app-drop-link 425 190 \
           "KiAssist-0.1.0.dmg" \
-          "dist/KiAssist.app" || true
+          "dist/KiAssist.app" || echo "Warning: DMG creation failed, app bundle will still be available"
 
     - name: Install AppImage dependencies (Ubuntu)
       if: matrix.platform == 'ubuntu-latest'

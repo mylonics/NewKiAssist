@@ -1,5 +1,6 @@
 ; Inno Setup Script for KiAssist
 ; Creates a Windows installer for the KiAssist application
+; NOTE: Version number should be kept in sync with python-lib/pyproject.toml
 
 #define MyAppName "KiAssist"
 #define MyAppVersion "0.1.0"
