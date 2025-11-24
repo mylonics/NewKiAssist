@@ -647,7 +647,7 @@ button:disabled {
   }
   
   .modal-content {
-    background-color: #1a1a1a;
+    background-color: var(--bg-primary, #1a1a1a);
   }
 }
 </style>
