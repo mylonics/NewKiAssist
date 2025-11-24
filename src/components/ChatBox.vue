@@ -294,7 +294,7 @@ onMounted(() => {
               class="copy-btn"
               :title="copiedMessageId === message.id ? 'Copied!' : 'Copy message'"
             >
-              {{ copiedMessageId === message.id ? '✓' : '📋' }}
+              {{ copiedMessageId === message.id ? 'Copied' : 'Copy' }}
             </button>
           </div>
           <div class="message-text">{{ message.text }}</div>

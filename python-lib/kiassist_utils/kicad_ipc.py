@@ -15,7 +15,8 @@ class KiCadInstance:
     """Represents a detected KiCad instance."""
     
     def __init__(self, socket_path: str, project_name: str = "Unknown Project", 
-                 display_name: str = "", version: str = ""):
+                 display_name: str = "", version: str = "", project_path: str = "",
+                 pcb_path: str = "", schematic_path: str = ""):
         """Initialize KiCad instance.
         
         Args:
@@ -23,11 +24,17 @@ class KiCadInstance:
             project_name: Name of the project
             display_name: Display name for UI
             version: KiCad version string
+            project_path: Path to the project file
+            pcb_path: Path to the PCB file
+            schematic_path: Path to the schematic file
         """
         self.socket_path = socket_path
         self.project_name = project_name
-        self.display_name = display_name or f"KiCad {version}"
+        self.display_name = display_name or project_name
         self.version = version
+        self.project_path = project_path
+        self.pcb_path = pcb_path
+        self.schematic_path = schematic_path
     
     def to_dict(self) -> Dict[str, str]:
         """Convert instance to dictionary.
@@ -40,6 +47,9 @@ class KiCadInstance:
             "project_name": self.project_name,
             "display_name": self.display_name,
             "version": self.version,
+            "project_path": self.project_path,
+            "pcb_path": self.pcb_path,
+            "schematic_path": self.schematic_path,
         }
 
 
@@ -184,24 +194,88 @@ def probe_kicad_instance(socket_path: str) -> Optional[KiCadInstance]:
         except Exception:
             version_str = "Unknown"
         
-        # Try to get open documents to determine project name
+        # Try to get open documents to determine project name and file paths
         project_name = "No Project Open"
+        project_path = ""
+        pcb_path = ""
+        schematic_path = ""
+        
         try:
-            docs = kicad.get_open_documents(base_types_pb2.DocumentType.DOCTYPE_PCB)
-            if docs and len(docs) > 0:
-                doc = docs[0]
+            # Get PCB documents
+            pcb_docs = kicad.get_open_documents(base_types_pb2.DocumentType.DOCTYPE_PCB)
+            if pcb_docs and len(pcb_docs) > 0:
+                doc = pcb_docs[0]
                 project_path = doc.project.path
                 project_name = Path(project_path).stem
-        except Exception:
-            pass
+                # Try to get the PCB file path from the document
+                try:
+                    # Try different attributes that might contain the path
+                    if hasattr(doc, 'path'):
+                        pcb_path = doc.path
+                    elif hasattr(doc, 'file_path'):
+                        pcb_path = doc.file_path
+                    elif hasattr(doc, 'filename'):
+                        pcb_path = doc.filename
+                except Exception as e:
+                    print(f"Could not get PCB path from document: {e}")
+        except Exception as e:
+            print(f"Could not get PCB documents: {e}")
         
-        display_name = f"{project_name} (KiCad {version_str})" if project_name != "No Project Open" else f"KiCad {version_str}"
+        try:
+            # Get schematic documents
+            sch_docs = kicad.get_open_documents(base_types_pb2.DocumentType.DOCTYPE_SCHEMATIC)
+            if sch_docs and len(sch_docs) > 0:
+                doc = sch_docs[0]
+                # Use project path from schematic if not set yet
+                if not project_path:
+                    project_path = doc.project.path
+                    project_name = Path(project_path).stem
+                # Try to get the schematic file path from the document
+                try:
+                    if hasattr(doc, 'path'):
+                        schematic_path = doc.path
+                    elif hasattr(doc, 'file_path'):
+                        schematic_path = doc.file_path
+                    elif hasattr(doc, 'filename'):
+                        schematic_path = doc.filename
+                except Exception as e:
+                    print(f"Could not get schematic path from document: {e}")
+        except Exception as e:
+            print(f"Could not get schematic documents: {e}")
+        
+        # If we have a project path but no file paths, try to find them in the project directory
+        if project_path and (not pcb_path or not schematic_path):
+            try:
+                project_dir = Path(project_path)
+                if project_dir.is_dir():
+                    # Look for .kicad_pcb file
+                    if not pcb_path:
+                        pcb_files = list(project_dir.glob("*.kicad_pcb"))
+                        if pcb_files:
+                            pcb_path = str(pcb_files[0])
+                    
+                    # Look for .kicad_sch file (root schematic)
+                    if not schematic_path:
+                        sch_files = list(project_dir.glob("*.kicad_sch"))
+                        # Try to find the root schematic (usually same name as project)
+                        root_sch = project_dir / f"{project_name}.kicad_sch"
+                        if root_sch.exists():
+                            schematic_path = str(root_sch)
+                        elif sch_files:
+                            schematic_path = str(sch_files[0])
+            except Exception as e:
+                print(f"Could not search project directory: {e}")
+        
+        display_name = project_name if project_name != "No Project Open" else f"KiCad {version_str}"
         
         return KiCadInstance(
             socket_path=socket_path,
             project_name=project_name,
             display_name=display_name,
-            version=version_str
+            version=version_str,
+            project_path=project_path,
+            pcb_path=pcb_path,
+            schematic_path=schematic_path
         )
     except Exception as e:
         print(f"Warning: Could not probe KiCad instance at {socket_path}: {e}")

@@ -5,6 +5,9 @@ export interface KiCadInstance {
   project_name: string;
   display_name: string;
   version: string;
+  project_path: string;
+  pcb_path: string;
+  schematic_path: string;
 }
 
 export interface ApiResult {

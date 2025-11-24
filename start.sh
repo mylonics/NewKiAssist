@@ -14,11 +14,9 @@ fi
 # Activate virtual environment
 source venv/bin/activate
 
-# Check if dist directory exists
-if [ ! -d "dist" ]; then
-    echo "Building frontend..."
-    npm run build
-fi
+# Build frontend
+echo "Building frontend..."
+npm run build
 
 # Install Python dependencies if needed
 echo "Checking Python dependencies..."

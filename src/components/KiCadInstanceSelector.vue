@@ -92,6 +92,20 @@ onMounted(() => {
           <div class="instance-project">{{ instances[0].project_name }}</div>
         </div>
       </div>
+      <div class="selected-info">
+        <div class="info-row" v-if="instances[0].project_path">
+          <span class="label">Project:</span>
+          <span class="value" :title="instances[0].project_path">{{ instances[0].project_path }}</span>
+        </div>
+        <div class="info-row" v-if="instances[0].pcb_path">
+          <span class="label">PCB:</span>
+          <span class="value" :title="instances[0].pcb_path">{{ instances[0].pcb_path }}</span>
+        </div>
+        <div class="info-row" v-if="instances[0].schematic_path">
+          <span class="label">Schematic:</span>
+          <span class="value" :title="instances[0].schematic_path">{{ instances[0].schematic_path }}</span>
+        </div>
+      </div>
       <p class="connection-status">Connected to KiCAD</p>
     </div>
 
@@ -113,13 +127,17 @@ onMounted(() => {
       </select>
 
       <div v-if="selectedInstance" class="selected-info">
-        <div class="info-row">
+        <div class="info-row" v-if="selectedInstance.project_path">
           <span class="label">Project:</span>
-          <span class="value">{{ selectedInstance.project_name }}</span>
+          <span class="value" :title="selectedInstance.project_path">{{ selectedInstance.project_path }}</span>
         </div>
-        <div class="info-row">
-          <span class="label">Version:</span>
-          <span class="value">{{ selectedInstance.version }}</span>
+        <div class="info-row" v-if="selectedInstance.pcb_path">
+          <span class="label">PCB:</span>
+          <span class="value" :title="selectedInstance.pcb_path">{{ selectedInstance.pcb_path }}</span>
+        </div>
+        <div class="info-row" v-if="selectedInstance.schematic_path">
+          <span class="label">Schematic:</span>
+          <span class="value" :title="selectedInstance.schematic_path">{{ selectedInstance.schematic_path }}</span>
         </div>
       </div>
     </div>
@@ -344,10 +362,16 @@ onMounted(() => {
 .info-row .label {
   font-weight: 500;
   color: var(--text-secondary);
+  min-width: 80px;
+  flex-shrink: 0;
 }
 
 .info-row .value {
   color: var(--text-primary);
-  font-weight: 600;
+  font-weight: 400;
+  word-break: break-all;
+  text-align: right;
+  font-size: 0.85rem;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
 }
 </style>
