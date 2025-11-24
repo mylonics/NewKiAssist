@@ -80,4 +80,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: windows-build
-        path: dist/KiAssist.exe
+        path: dist/KiAssist
