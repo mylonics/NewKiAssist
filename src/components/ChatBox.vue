@@ -9,6 +9,8 @@ interface Message {
   timestamp: Date;
 }
 
+const copiedMessageId = ref<string | null>(null);
+
 const messages = ref<Message[]>([]);
 const inputMessage = ref('');
 const selectedModel = ref('2.5-flash');
@@ -32,16 +34,38 @@ function generateMessageId(): string {
 async function checkApiKey() {
   try {
     if (window.pywebview?.api) {
+      console.log('[UI] Checking API key...');
       hasApiKey.value = await window.pywebview.api.check_api_key();
+      console.log('[UI] Has API key:', hasApiKey.value);
       if (!hasApiKey.value) {
         showApiKeyPrompt.value = true;
       }
     } else {
-      console.error('pywebview API not available');
+      console.error('[UI] pywebview API not available');
     }
   } catch (error) {
-    console.error('Error checking API key:', error);
+    console.error('[UI] Error checking API key:', error);
   }
+}
+
+// Wait for pywebview API to be ready before checking API key
+async function waitForPywebviewAndCheckApiKey() {
+  console.log('[UI] Waiting for pywebview API...');
+  
+  // Try up to 10 times with 100ms delays
+  for (let i = 0; i < 10; i++) {
+    if (window.pywebview?.api) {
+      console.log('[UI] pywebview API ready!');
+      await checkApiKey();
+      return;
+    }
+    console.log(`[UI] Waiting for API... attempt ${i + 1}/10`);
+    await new Promise(resolve => setTimeout(resolve, 100));
+  }
+  
+  console.error('[UI] pywebview API not available after waiting');
+  // Still show the API key prompt since we need it
+  showApiKeyPrompt.value = true;
 }
 
 const apiKeyError = ref<string>('');
@@ -52,16 +76,35 @@ async function saveApiKey() {
   apiKeyError.value = ''; // Clear previous errors
   apiKeyWarning.value = ''; // Clear previous warnings
   
+  const trimmedKey = apiKeyInput.value.trim();
+  
+  // Validate API key format
+  if (trimmedKey.length < 30) {
+    apiKeyError.value = 'API key seems too short. Gemini API keys are typically 39 characters long.';
+    return;
+  }
+  
+  if (!trimmedKey.startsWith('AIza')) {
+    apiKeyError.value = 'This doesn\'t look like a valid Gemini API key. Keys should start with "AIza". Get your key from https://aistudio.google.com/apikey';
+    return;
+  }
+  
   try {
     if (window.pywebview?.api) {
-      const result = await window.pywebview.api.set_api_key(apiKeyInput.value.trim());
+      console.log('[UI] Saving API key...');
+      const result = await window.pywebview.api.set_api_key(trimmedKey);
+      console.log('[UI] Save result:', result);
+      
       if (result.success) {
         hasApiKey.value = true;
         showApiKeyPrompt.value = false;
         apiKeyInput.value = '';
+        console.log('[UI] API key saved successfully!');
+        
         // Show warning as a message if there was one
         if (result.warning) {
           apiKeyWarning.value = result.warning;
+          console.warn('[UI] Save warning:', result.warning);
           // Also add a message to inform the user
           const warningMessage: Message = {
             id: generateMessageId(),
@@ -72,13 +115,16 @@ async function saveApiKey() {
           messages.value.push(warningMessage);
         }
       } else {
+        console.error('[UI] Failed to save API key:', result.error);
         apiKeyError.value = result.error || 'Unknown error occurred';
       }
     } else {
-      apiKeyError.value = 'Application backend not available. Please restart the application.';
+      const errorMsg = 'Application backend not available. Please restart the application.';
+      console.error('[UI]', errorMsg);
+      apiKeyError.value = errorMsg;
     }
   } catch (error) {
-    console.error('Error saving API key:', error);
+    console.error('[UI] Error saving API key:', error);
     apiKeyError.value = 'Failed to save API key. Please try again.';
   }
 }
@@ -159,8 +205,21 @@ function handleKeyPress(event: KeyboardEvent) {
   }
 }
 
+async function copyMessage(messageId: string, text: string) {
+  try {
+    await navigator.clipboard.writeText(text);
+    copiedMessageId.value = messageId;
+    setTimeout(() => {
+      copiedMessageId.value = null;
+    }, 2000);
+  } catch (error) {
+    console.error('Failed to copy message:', error);
+  }
+}
+
 onMounted(() => {
-  checkApiKey();
+  // Use the wait function to ensure pywebview API is ready
+  waitForPywebviewAndCheckApiKey();
 });
 </script>
 
@@ -229,6 +288,15 @@ onMounted(() => {
         :class="['message', message.sender]"
       >
         <div class="message-content">
+          <div class="message-header">
+            <button 
+              @click="copyMessage(message.id, message.text)"
+              class="copy-btn"
+              :title="copiedMessageId === message.id ? 'Copied!' : 'Copy message'"
+            >
+              {{ copiedMessageId === message.id ? '✓' : '📋' }}
+            </button>
+          </div>
           <div class="message-text">{{ message.text }}</div>
           <div class="message-time">
             {{ message.timestamp.toLocaleTimeString() }}
@@ -264,7 +332,9 @@ onMounted(() => {
 .chat-container {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 100%;
+  max-height: 100%;
+  overflow: hidden;
   max-width: 900px;
   margin: 0 auto;
   background-color: var(--bg-primary);
@@ -275,6 +345,7 @@ onMounted(() => {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
 }
 
 .header-content {
@@ -339,8 +410,10 @@ onMounted(() => {
 .chat-messages {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 1.5rem;
   background-color: var(--bg-secondary);
+  min-height: 0;
 }
 
 .welcome-message {
@@ -389,6 +462,40 @@ onMounted(() => {
   padding: 0.75rem 1rem;
   border-radius: 12px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.message-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.25rem;
+}
+
+.copy-btn {
+  padding: 0.25rem 0.5rem;
+  background: rgba(0, 0, 0, 0.1);
+  border: none;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  min-width: 2rem;
+  height: 1.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.copy-btn:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.message.user .copy-btn {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.message.user .copy-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .message.user .message-content {
@@ -405,12 +512,15 @@ onMounted(() => {
 
 .message-text {
   word-wrap: break-word;
+  word-break: break-word;
+  overflow-wrap: break-word;
   line-height: 1.5;
   user-select: text;
   -webkit-user-select: text;
   -moz-user-select: text;
   -ms-user-select: text;
   cursor: text;
+  max-width: 100%;
 }
 
 .message-time {
@@ -426,6 +536,7 @@ onMounted(() => {
   padding: 1.25rem;
   background-color: var(--bg-primary);
   border-top: 1px solid var(--border-color);
+  flex-shrink: 0;
 }
 
 textarea {

@@ -65,9 +65,10 @@ def get_ipc_socket_dir() -> Path:
 def discover_socket_files() -> List[Path]:
     """Discover all KiCad IPC socket files.
     
-    Scans the socket directory for socket files matching the pattern:
-    - api.sock (main instance)
-    - api-<PID>.sock (additional instances with process ID)
+    On Windows: Enumerates named pipes in \\.\pipe\ to find KiCad sockets.
+    On Linux/macOS: Scans the socket directory for socket files matching the pattern.
+    
+    Pattern: api.sock (main instance) or api-<PID>.sock (additional instances)
     
     Returns:
         List of paths to socket files
@@ -75,12 +76,49 @@ def discover_socket_files() -> List[Path]:
     socket_dir = get_ipc_socket_dir()
     sockets = []
     
-    # Check if socket directory exists
+    if _CURRENT_PLATFORM == "Windows":
+        # On Windows, we need to enumerate named pipes
+        # The pipe names are the full paths: C:\Users\...\Temp\kicad\api.sock
+        try:
+            import subprocess
+            # Use PowerShell to enumerate pipes matching our pattern
+            temp_dir = str(socket_dir).replace('/', '\\')
+            
+            # PowerShell command to find pipes matching the kicad socket pattern
+            cmd = f'Get-ChildItem \\\\.\\pipe\\ | Where-Object {{ $_.Name -like "{temp_dir}\\api*.sock" }} | Select-Object -ExpandProperty Name'
+            result = subprocess.run(
+                ['powershell', '-Command', cmd],
+                capture_output=True,
+                text=True,
+                timeout=5
+            )
+            
+            if result.returncode == 0 and result.stdout.strip():
+                # Parse the output to get pipe names
+                pipe_names = result.stdout.strip().split('\n')
+                for pipe_name in pipe_names:
+                    pipe_name = pipe_name.strip()
+                    if pipe_name:
+                        # Extract just the filename part after the last backslash
+                        filename = pipe_name.split('\\')[-1]
+                        # Validate the pattern: api.sock or api-<PID>.sock
+                        if filename == "api.sock" or (
+                            filename.startswith("api-") and 
+                            filename.endswith(".sock") and
+                            filename[4:-5].isdigit()
+                        ):
+                            # Return the full pipe path (this is what gets passed to ipc://)
+                            sockets.append(Path(pipe_name))
+        except Exception as e:
+            print(f"Warning: Could not enumerate Windows named pipes: {e}")
+        
+        return sockets
+    
+    # On Linux/macOS, scan the directory for actual socket files
     if not socket_dir.exists():
         return sockets
     
     # Look for files matching api*.sock pattern
-    # This works on all platforms including Windows where KiCad creates actual files
     try:
         for entry in socket_dir.iterdir():
             if entry.is_file() or entry.is_socket():

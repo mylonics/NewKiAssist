@@ -44,7 +44,12 @@ class KiAssistAPI:
         Returns:
             True if API key exists, False otherwise
         """
-        return self.api_key_store.has_api_key()
+        has_key = self.api_key_store.has_api_key()
+        print(f"[DEBUG] check_api_key result: {has_key}")
+        if has_key:
+            key = self.api_key_store.get_api_key()
+            print(f"[DEBUG] Key exists, length: {len(key) if key else 0}")
+        return has_key
     
     def get_api_key(self) -> Optional[str]:
         """Get the stored API key.
@@ -64,14 +69,25 @@ class KiAssistAPI:
             Result dictionary with success status and optional warning
         """
         try:
+            print(f"[DEBUG] set_api_key called with key length: {len(api_key) if api_key else 0}")
             success, warning = self.api_key_store.set_api_key(api_key)
+            print(f"[DEBUG] set_api_key result - success: {success}, warning: {warning}")
+            
+            # Verify the key was saved by trying to retrieve it
+            retrieved = self.api_key_store.get_api_key()
+            print(f"[DEBUG] Retrieved key matches: {retrieved == api_key}")
+            
             # Update the Gemini API instance
             self.gemini_api = GeminiAPI(api_key)
             result = {"success": success}
             if warning:
                 result["warning"] = warning
+            print(f"[DEBUG] Returning result: {result}")
             return result
         except Exception as e:
+            print(f"[DEBUG] Exception in set_api_key: {e}")
+            import traceback
+            traceback.print_exc()
             return {"success": False, "error": str(e)}
     
     def send_message(self, message: str, model: str = "2.5-flash") -> dict:
@@ -189,6 +205,13 @@ def create_window(api: KiAssistAPI):
 
 def main():
     """Main entry point for the application."""
+    print("\n" + "="*60)
+    print("KiAssist - KiCAD AI Assistant")
+    print("="*60)
+    print("TIP: Open browser DevTools to see [UI] debug messages")
+    print("     (Right-click in app > Inspect Element > Console tab)")
+    print("="*60 + "\n")
+    
     # Create the backend API
     api = KiAssistAPI()
     
