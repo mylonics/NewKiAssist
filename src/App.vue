@@ -17,25 +17,36 @@ import KiCadInstanceSelector from './components/KiCadInstanceSelector.vue';
 <style>
 /* Default color variables (light mode) */
 :root {
-  --bg-primary: #f5f5f5;
-  --bg-secondary: #e8e8e8;
-  --bg-tertiary: #dcdcdc;
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --bg-tertiary: #f0f2f5;
   --bg-input: #ffffff;
-  --text-primary: #2d2d2d;
-  --text-secondary: #666666;
-  --border-color: #c0c0c0;
+  --text-primary: #1a1a2e;
+  --text-secondary: #5a5a72;
+  --border-color: #e1e4e8;
+  --accent-color: #5865f2;
+  --accent-hover: #4752c4;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
 }
 
 /* Dark mode support */
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg-primary: #1e1e1e;
-    --bg-secondary: #252525;
-    --bg-tertiary: #2d2d2d;
-    --bg-input: #1e1e1e;
-    --text-primary: #e4e4e4;
-    --text-secondary: #a0a0a0;
-    --border-color: #404040;
+    --bg-primary: #1e1e2e;
+    --bg-secondary: #181825;
+    --bg-tertiary: #242438;
+    --bg-input: #2a2a3c;
+    --text-primary: #e8e8f0;
+    --text-secondary: #a0a0b8;
+    --border-color: #3a3a4c;
+    --accent-color: #7289da;
+    --accent-hover: #5865f2;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.3);
   }
 }
 
@@ -81,6 +92,7 @@ body {
   border-right: 1px solid var(--border-color);
   overflow-y: auto;
   flex-shrink: 0;
+  box-shadow: var(--shadow-sm);
 }
 
 .chat-panel {
