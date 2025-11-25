@@ -78,6 +78,12 @@ export interface SynthesizeResult extends ApiResult {
   todo?: string;
 }
 
+export interface InjectTestNoteResult extends ApiResult {
+  message?: string;
+  schematic_path?: string;
+  created_new?: boolean;
+}
+
 export interface PyWebViewAPI {
   echo_message: (message: string) => Promise<string>;
   detect_kicad_instances: () => Promise<KiCadInstance[]>;
@@ -99,6 +105,9 @@ export interface PyWebViewAPI {
   save_requirements: (projectDir: string, requirementsContent: string, todoContent?: string) => Promise<SaveRequirementsResult>;
   refine_wizard_questions: (initialAnswers: Record<string, string>, model?: string) => Promise<WizardQuestionsResult>;
   synthesize_requirements: (questions: WizardQuestion[], answers: Record<string, string>, projectName?: string, model?: string) => Promise<SynthesizeResult>;
+  // Schematic API
+  inject_schematic_test_note: (projectPath: string) => Promise<InjectTestNoteResult>;
+  is_schematic_api_available: () => Promise<boolean>;
 }
 
 declare global {

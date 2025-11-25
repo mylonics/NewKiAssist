@@ -20,6 +20,7 @@ from .requirements_wizard import (
     parse_refined_questions,
     parse_synthesized_docs,
 )
+from .kicad_schematic import inject_test_note, is_schematic_api_available
 
 
 class KiAssistAPI:
@@ -402,6 +403,36 @@ class KiAssistAPI:
             
         except Exception as e:
             return {"success": False, "error": f"Error synthesizing requirements: {str(e)}"}
+    
+    # Schematic API methods
+    
+    def inject_schematic_test_note(self, project_path: str) -> Dict[str, Any]:
+        """Inject a test note into the schematic for a KiCad project.
+        
+        If a schematic exists, it will be loaded, modified, and saved.
+        If no schematic exists, a new one will be created with the project name.
+        
+        Args:
+            project_path: Path to the .kicad_pro project file
+            
+        Returns:
+            Dictionary with success status and details
+        """
+        if not project_path:
+            return {
+                "success": False,
+                "error": "No project is open. Please open a KiCad project first."
+            }
+        
+        return inject_test_note(project_path)
+    
+    def is_schematic_api_available(self) -> bool:
+        """Check if the schematic API (kicad-sch-api) is available.
+        
+        Returns:
+            True if the API is available, False otherwise
+        """
+        return is_schematic_api_available()
 
 
 def get_frontend_path() -> Path:

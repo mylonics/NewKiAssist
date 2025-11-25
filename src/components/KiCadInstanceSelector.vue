@@ -6,6 +6,7 @@ import RequirementsWizard from './RequirementsWizard.vue';
 // Configuration
 const MAX_VISIBLE_RECENT = 5;
 const REFRESH_INTERVAL_MS = 10000; // 10 seconds
+const MESSAGE_DISPLAY_DURATION_MS = 5000; // 5 seconds for success messages
 
 const openProjects = ref<KiCadInstance[]>([]);
 const recentProjects = ref<RecentProject[]>([]);
@@ -19,6 +20,10 @@ let refreshTimer: number | null = null;
 const showRequirementsWizard = ref(false);
 const requirementsExists = ref(false);
 const todoExists = ref(false);
+
+// Inject test state
+const injectingTest = ref(false);
+const injectTestMessage = ref<string>('');
 
 async function waitForAPI(maxAttempts = 20, delayMs = 100): Promise<boolean> {
   for (let i = 0; i < maxAttempts; i++) {
@@ -230,6 +235,45 @@ function onRequirementsSaved(files: string[]) {
   checkRequirementsFile();
 }
 
+// Inject test note function
+async function injectTestNote() {
+  if (!selectedProjectInfo.value?.projectPath) {
+    error.value = 'No project selected. Please select a KiCad project first.';
+    return;
+  }
+  
+  injectingTest.value = true;
+  injectTestMessage.value = '';
+  error.value = '';
+  
+  try {
+    const apiAvailable = await waitForAPI();
+    if (!apiAvailable) {
+      error.value = 'pywebview API not available';
+      return;
+    }
+    
+    const result = await window.pywebview!.api.inject_schematic_test_note(
+      selectedProjectInfo.value.projectPath
+    );
+    
+    if (result.success) {
+      injectTestMessage.value = result.message || 'Test note injected successfully!';
+      // Clear message after the configured duration
+      setTimeout(() => {
+        injectTestMessage.value = '';
+      }, MESSAGE_DISPLAY_DURATION_MS);
+    } else {
+      error.value = result.error || 'Failed to inject test note';
+    }
+  } catch (err) {
+    error.value = `Error injecting test note: ${err}`;
+    console.error('Error injecting test note:', err);
+  } finally {
+    injectingTest.value = false;
+  }
+}
+
 // Watch for project changes to update requirements status
 watch(selectedProject, () => {
   checkRequirementsFile();
@@ -368,6 +412,25 @@ onUnmounted(() => {
           <span class="material-icons">{{ requirementsExists ? 'edit' : 'add' }}</span>
           {{ requirementsExists ? 'Edit' : 'Create' }}
         </button>
+      </div>
+      
+      <!-- Inject Test Section -->
+      <div class="inject-test-section">
+        <button 
+          @click="injectTestNote" 
+          class="inject-test-btn"
+          :disabled="injectingTest || !selectedProjectInfo.projectPath"
+          title="Add a test note to the schematic"
+        >
+          <span class="material-icons" :class="{ spinning: injectingTest }">
+            {{ injectingTest ? 'sync' : 'science' }}
+          </span>
+          {{ injectingTest ? 'Injecting...' : 'Inject Test' }}
+        </button>
+        <div v-if="injectTestMessage" class="inject-test-message success">
+          <span class="material-icons">check_circle</span>
+          {{ injectTestMessage }}
+        </div>
       </div>
     </div>
     
@@ -787,5 +850,71 @@ onUnmounted(() => {
 
 .requirements-btn .material-icons {
   font-size: 0.875rem;
+}
+
+/* Inject Test Section */
+.inject-test-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.inject-test-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.625rem;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.inject-test-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.inject-test-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.inject-test-btn .material-icons {
+  font-size: 1.125rem;
+}
+
+.inject-test-btn .material-icons.spinning {
+  animation: spin 1s linear infinite;
+}
+
+.inject-test-message {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.625rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.inject-test-message.success {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.inject-test-message .material-icons {
+  font-size: 1rem;
 }
 </style>
