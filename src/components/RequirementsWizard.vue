@@ -80,6 +80,16 @@ const progress = computed(() => {
   return Math.round(((currentStep.value + 1) / steps.length) * 100);
 });
 
+const loadingMessage = computed(() => {
+  if (isInitialPhase.value) {
+    return 'Analyzing your requirements...';
+  }
+  if (isDetailedPhase.value) {
+    return 'Generating your documents...';
+  }
+  return 'Saving files...';
+});
+
 // Methods
 async function loadQuestions() {
   try {
@@ -259,7 +269,7 @@ watch(() => props.visible, async (newVal) => {
         <!-- Loading state -->
         <div v-if="isLoading" class="loading-state">
           <div class="spinner"></div>
-          <p>{{ isInitialPhase ? 'Analyzing your requirements...' : isDetailedPhase ? 'Generating your documents...' : 'Saving files...' }}</p>
+          <p>{{ loadingMessage }}</p>
         </div>
         
         <!-- Questions form -->

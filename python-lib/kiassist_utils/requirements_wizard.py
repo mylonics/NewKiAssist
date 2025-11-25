@@ -6,6 +6,12 @@ from pathlib import Path
 from typing import Dict, Any, List, Optional
 
 
+# Number of initial questions used for LLM refinement
+INITIAL_QUESTIONS_COUNT = 2
+
+# IDs of the initial questions used for refinement
+INITIAL_QUESTION_IDS = ('objectives', 'known_parts')
+
 # Default wizard questions organized by category
 DEFAULT_QUESTIONS = [
     {
@@ -239,11 +245,17 @@ def build_refine_prompt(answers: Dict[str, str]) -> str:
     """
     agent_prompt = get_agent_prompt()
     
+    # Build a lookup for initial questions by ID
+    initial_questions_lookup = {
+        q['id']: q['question'] 
+        for q in DEFAULT_QUESTIONS[:INITIAL_QUESTIONS_COUNT]
+    }
+    
     # Format the initial answers
     answers_text = "\n".join([
-        f"Q: {DEFAULT_QUESTIONS[0]['question'] if qid == 'objectives' else DEFAULT_QUESTIONS[1]['question']}\nA: {answer}"
+        f"Q: {initial_questions_lookup.get(qid, 'Unknown question')}\nA: {answer}"
         for qid, answer in answers.items()
-        if qid in ('objectives', 'known_parts')
+        if qid in INITIAL_QUESTION_IDS
     ])
     
     prompt = f"""{agent_prompt}
@@ -369,8 +381,8 @@ def parse_refined_questions(llm_response: str) -> List[Dict[str, Any]]:
     except (json.JSONDecodeError, KeyError, TypeError):
         pass
     
-    # Return remaining default questions on failure
-    return DEFAULT_QUESTIONS[2:]  # Skip first two (objectives and known_parts)
+    # Return remaining default questions on failure (skip initial questions)
+    return DEFAULT_QUESTIONS[INITIAL_QUESTIONS_COUNT:]
 
 
 def parse_synthesized_docs(llm_response: str) -> Dict[str, str]:

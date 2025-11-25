@@ -17,6 +17,7 @@ from kiassist_utils.requirements_wizard import (
     parse_refined_questions,
     parse_synthesized_docs,
     DEFAULT_QUESTIONS,
+    INITIAL_QUESTIONS_COUNT,
 )
 
 
@@ -216,8 +217,8 @@ class TestParseRefinedQuestions:
         """Test returning default questions on invalid JSON."""
         result = parse_refined_questions('invalid json')
         
-        # Should return remaining default questions (skipping first 2)
-        assert len(result) == len(DEFAULT_QUESTIONS) - 2
+        # Should return remaining default questions (skipping initial questions)
+        assert len(result) == len(DEFAULT_QUESTIONS) - INITIAL_QUESTIONS_COUNT
 
 
 class TestParseSynthesizedDocs:
