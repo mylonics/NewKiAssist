@@ -63,15 +63,17 @@ onMounted(() => {
   <div class="kicad-selector">
     <div class="selector-header">
       <h3>KiCAD Connection</h3>
-      <button @click="detectInstances" :disabled="loading" class="refresh-btn">
-        {{ loading ? 'Detecting...' : '🔄 Refresh' }}
+      <button @click="detectInstances" :disabled="loading" class="refresh-btn" :title="loading ? 'Detecting KiCAD instances...' : 'Refresh KiCAD instances'">
+        <span class="material-icons">{{ loading ? 'hourglass_empty' : 'refresh' }}</span>
       </button>
     </div>
 
     <div v-if="error" class="error-message">
-      <span class="error-icon">⚠️</span>
+      <span class="material-icons error-icon">warning</span>
       <span class="error-text">{{ error }}</span>
-      <button @click="copyError" class="copy-btn" title="Copy error message">Copy</button>
+      <button @click="copyError" class="copy-btn" title="Copy error message">
+        <span class="material-icons">content_copy</span>
+      </button>
     </div>
 
     <div v-else-if="loading" class="loading-message">
@@ -86,7 +88,9 @@ onMounted(() => {
 
     <div v-else-if="instances.length === 1" class="single-instance">
       <div class="instance-card selected">
-        <div class="instance-icon">✓</div>
+        <div class="instance-icon">
+          <span class="material-icons">check</span>
+        </div>
         <div class="instance-info">
           <div class="instance-name">{{ instances[0].display_name }}</div>
           <div class="instance-project">{{ instances[0].project_name }}</div>
@@ -147,9 +151,10 @@ onMounted(() => {
 <style scoped>
 .kicad-selector {
   padding: 1rem;
-  background-color: var(--bg-tertiary);
-  border-radius: 8px;
-  margin-bottom: 1rem;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .selector-header {
@@ -157,27 +162,37 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .selector-header h3 {
   margin: 0;
-  font-size: 1.1rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
   color: var(--text-primary);
 }
 
 .refresh-btn {
-  padding: 0.5rem 1rem;
-  background-color: var(--bg-input);
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
+  padding: 0.375rem;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  font-size: 0.9rem;
-  color: var(--text-primary);
-  transition: background-color 0.2s;
+  color: var(--text-secondary);
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.refresh-btn .material-icons {
+  font-size: 1.375rem;
 }
 
 .refresh-btn:hover:not(:disabled) {
-  background-color: var(--bg-secondary);
+  background-color: var(--bg-tertiary);
+  color: var(--accent-color);
 }
 
 .refresh-btn:disabled {
@@ -187,59 +202,66 @@ onMounted(() => {
 
 .error-message {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.5rem;
   padding: 0.75rem;
-  background-color: #fee;
-  border: 1px solid #fcc;
-  border-radius: 6px;
-  color: #c33;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: var(--radius-md);
+  color: #dc2626;
+  font-size: 0.8125rem;
 }
 
 .error-icon {
-  font-size: 1.2rem;
+  font-size: 1.25rem;
   flex-shrink: 0;
+  color: #dc2626;
 }
 
 .error-text {
   flex: 1;
+  line-height: 1.4;
 }
 
 .copy-btn {
-  padding: 0.25rem 0.5rem;
-  background-color: rgba(0, 0, 0, 0.05);
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 4px;
+  padding: 0.25rem;
+  background-color: rgba(220, 38, 38, 0.1);
+  border: 1px solid rgba(220, 38, 38, 0.2);
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  font-size: 0.75rem;
-  transition: background-color 0.2s;
   flex-shrink: 0;
+  color: #dc2626;
+  transition: background 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.copy-btn .material-icons {
+  font-size: 1rem;
 }
 
 .copy-btn:hover {
-  background-color: rgba(0, 0, 0, 0.1);
-}
-
-.copy-btn:active {
-  background-color: rgba(0, 0, 0, 0.15);
+  background-color: rgba(220, 38, 38, 0.15);
 }
 
 .loading-message {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.625rem;
   padding: 1rem;
   justify-content: center;
   color: var(--text-secondary);
+  font-size: 0.875rem;
 }
 
 .spinner {
-  width: 20px;
-  height: 20px;
-  border: 3px solid var(--border-color);
-  border-top-color: #667eea;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--border-color);
+  border-top-color: var(--accent-color);
   border-radius: 50%;
-  animation: spin 1s linear infinite;
+  animation: spin 0.8s linear infinite;
 }
 
 @keyframes spin {
@@ -248,73 +270,109 @@ onMounted(() => {
 
 .no-instances {
   text-align: center;
-  padding: 2rem 1rem;
+  padding: 1.5rem 1rem;
   color: var(--text-secondary);
 }
 
 .no-instances p:first-child {
   font-weight: 500;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.375rem;
+  font-size: 0.9375rem;
 }
 
 .hint {
-  font-size: 0.9rem;
-  opacity: 0.8;
+  font-size: 0.8125rem;
+  opacity: 0.85;
 }
 
 .single-instance {
-  text-align: center;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .instance-card {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 1rem;
-  background-color: var(--bg-primary);
-  border: 2px solid var(--border-color);
-  border-radius: 8px;
-  margin-bottom: 0.5rem;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  margin-bottom: 0.75rem;
+  transition: all 0.15s ease;
 }
 
 .instance-card.selected {
-  border-color: #667eea;
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+  border-color: var(--accent-color);
+  background: linear-gradient(135deg, rgba(88, 101, 242, 0.08) 0%, rgba(71, 82, 196, 0.08) 100%);
+  box-shadow: 0 0 0 2px rgba(88, 101, 242, 0.1);
 }
 
 .instance-icon {
-  width: 40px;
-  height: 40px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
   color: white;
-  border-radius: 50%;
+  border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
   flex-shrink: 0;
+  box-shadow: var(--shadow-sm);
+}
+
+.instance-icon .material-icons {
+  font-size: 1.25rem;
 }
 
 .instance-info {
   flex: 1;
-  text-align: left;
+  min-width: 0;
 }
 
 .instance-name {
-  font-weight: 600;
+  font-weight: 500;
   color: var(--text-primary);
-  margin-bottom: 0.25rem;
+  font-size: 0.875rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .instance-project {
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 0.125rem;
 }
 
 .connection-status {
-  color: #5a5;
+  color: #22c55e;
   font-weight: 500;
+  font-size: 0.8125rem;
   margin-top: 0.5rem;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+}
+
+.connection-status::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background-color: #22c55e;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }
 
 .multiple-instances label {
@@ -322,36 +380,45 @@ onMounted(() => {
   margin-bottom: 0.5rem;
   font-weight: 500;
   color: var(--text-primary);
+  font-size: 0.875rem;
 }
 
 .instance-dropdown {
   width: 100%;
-  padding: 0.75rem;
+  padding: 0.5rem 0.75rem;
   border: 1px solid var(--border-color);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   background-color: var(--bg-input);
   color: var(--text-primary);
-  font-size: 1rem;
+  font-size: 0.875rem;
   cursor: pointer;
-  transition: border-color 0.2s;
+  transition: all 0.15s ease;
+}
+
+.instance-dropdown:hover {
+  border-color: var(--accent-color);
 }
 
 .instance-dropdown:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px rgba(88, 101, 242, 0.15);
 }
 
 .selected-info {
-  margin-top: 1rem;
+  margin-top: 0.75rem;
   padding: 0.75rem;
-  background-color: var(--bg-primary);
-  border-radius: 6px;
+  background-color: var(--bg-secondary);
+  border-radius: var(--radius-md);
   border: 1px solid var(--border-color);
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .info-row {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   padding: 0.5rem 0;
 }
 
@@ -362,16 +429,18 @@ onMounted(() => {
 .info-row .label {
   font-weight: 500;
   color: var(--text-secondary);
-  min-width: 80px;
-  flex-shrink: 0;
+  font-size: 0.75rem;
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
 }
 
 .info-row .value {
   color: var(--text-primary);
   font-weight: 400;
   word-break: break-all;
-  text-align: right;
-  font-size: 0.85rem;
-  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 0.8125rem;
+  font-family: 'SF Mono', 'Consolas', 'Monaco', 'Courier New', monospace;
+  line-height: 1.4;
 }
 </style>
