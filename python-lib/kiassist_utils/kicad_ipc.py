@@ -2,6 +2,7 @@
 
 import os
 import platform
+import subprocess
 from pathlib import Path
 from tempfile import gettempdir
 from typing import List, Dict, Any, Optional
@@ -90,7 +91,6 @@ def discover_socket_files() -> List[Path]:
         # On Windows, we need to enumerate named pipes
         # The pipe names are the full paths: C:\Users\...\Temp\kicad\api.sock
         try:
-            import subprocess
             # Use PowerShell to enumerate pipes matching our pattern
             temp_dir = str(socket_dir).replace('/', '\\')
             
