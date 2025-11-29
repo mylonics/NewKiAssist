@@ -37,9 +37,7 @@ async function checkApiKey() {
       console.log('[UI] Checking API key...');
       hasApiKey.value = await window.pywebview.api.check_api_key();
       console.log('[UI] Has API key:', hasApiKey.value);
-      if (!hasApiKey.value) {
-        showApiKeyPrompt.value = true;
-      }
+      // Don't show API key prompt automatically - only when user tries to use Gemini
     } else {
       console.error('[UI] pywebview API not available');
     }
@@ -64,8 +62,7 @@ async function waitForPywebviewAndCheckApiKey() {
   }
   
   console.error('[UI] pywebview API not available after waiting');
-  // Still show the API key prompt since we need it
-  showApiKeyPrompt.value = true;
+  // Don't show API key prompt automatically - only when user tries to use Gemini
 }
 
 const apiKeyError = ref<string>('');
@@ -258,12 +255,14 @@ onMounted(() => {
 
     <div class="chat-header">
       <div class="header-controls">
-        <label for="model-select" class="model-label">Model:</label>
-        <select id="model-select" v-model="selectedModel" class="model-select">
-          <option v-for="model in availableModels" :key="model.value" :value="model.value">
-            {{ model.label }}
-          </option>
-        </select>
+        <template v-if="hasApiKey">
+          <label for="model-select" class="model-label">Model:</label>
+          <select id="model-select" v-model="selectedModel" class="model-select">
+            <option v-for="model in availableModels" :key="model.value" :value="model.value">
+              {{ model.label }}
+            </option>
+          </select>
+        </template>
         <button @click="showApiKeyPrompt = true" class="icon-btn" title="Configure API Key">
           <span class="material-icons">settings</span>
         </button>
